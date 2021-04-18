@@ -5,23 +5,31 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.codec.ServerCodecConfigurer;
 
-@Profile("!local-discovery")
+@Profile("local-discovery")
 @Configuration
-public class LocalHostRouteConfig {
+public class LoadBalancedRoutes {
+
+    //this bug was because of spring-boot-starter-web dependency
+    // from parent BOM, that is not compatible with eureka
+//    @Bean
+//    public ServerCodecConfigurer serverCodecConfigurer() {
+//        return ServerCodecConfigurer.create();
+//    }
 
     @Bean
-    public RouteLocator localHostRoutes(RouteLocatorBuilder builder){
+    public RouteLocator routeLocator(RouteLocatorBuilder builder){
         return builder.routes()
                 .route(r -> r.path("/api/v1/beer*", "/api/v1/beer/*")
 //                        .filters(f -> f.rewritePath("/api/v1/beer(?<segment>/?.*)", "/api/v1/beer${segment}"))
-                        .uri("http://localhost:8080")
+                        .uri("lb://BEER-SERVICE")
                         .id("beer-service"))
                 .route(r -> r.path("/api/v1/customers/**")
-                        .uri("http://localhost:9081")
+                        .uri("lb://beer-order-service")
                         .id("order-service"))
                 .route(r -> r.path("/api/v1/beer/*/inventory")
-                        .uri("http://localhost:9082")
+                        .uri("lb://beer-inventory-service")
                         .id("inventory-service"))
                 .build();
     }
