@@ -12,9 +12,12 @@ public class LocalHostRouteConfig {
     public RouteLocator localHostRoutes(RouteLocatorBuilder builder){
         return builder.routes()
                 .route(r -> r.path("/api/v1/beer*", "/api/v1/beer/*")
-                        .filters(f -> f.rewritePath("/api/v1/beer(?<segment>/?.*)", "/api/v1/beer${segment}"))
+//                        .filters(f -> f.rewritePath("/api/v1/beer(?<segment>/?.*)", "/api/v1/beer${segment}"))
                         .uri("http://localhost:8080")
                         .id("beer-service"))
+                .route(r -> r.path("/api/v1/customers/**")
+                        .uri("http://localhost:9081")
+                        .id("order-service"))
                 .build();
     }
 }
